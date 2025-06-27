@@ -1,36 +1,98 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
+# ---------------------
+# Salida compilada
+# ---------------------
+/dist
 /build
+/node_modules
 
-# misc
-.DS_Store
-*.pem
-
-# debug
+# ---------------------
+# Archivos de log
+# ---------------------
+logs
+*.log
+*.tgz
+*.gz
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 
-# local env files
-.env*.local
+# ---------------------
+# Archivos de sistema operativo
+# ---------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# ---------------------
+# Cobertura de pruebas
+# ---------------------
+/coverage
+/.nyc_output
+
+# ---------------------
+# IDEs y editores
+# ---------------------
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# ---------------------
+# VSCode (permitir ciertos archivos útiles)
+# ---------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ---------------------
+# Archivos de entorno
+# ---------------------
 .env
+.env.*
+!.env.example
 
-# vercel
-.vercel
+# ---------------------
+# Datos de ejecución
+# ---------------------
+pids
+*.pid
+*.pid.lock
+*.seed
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ---------------------
+# Informes de diagnóstico
+# ---------------------
+report.*.json
+
+# ---------------------
+# Archivos temporales
+# ---------------------
+.temp
+.tmp
+*.swp
+*.bak
+
+# ---------------------
+# NestJS (CLI)
+# ---------------------
+.nest-cli.json
+
+# ---------------------
+# Bases de datos locales
+# ---------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# ---------------------
+# Archivos de procesos PM2
+# ---------------------
+*.pm2
