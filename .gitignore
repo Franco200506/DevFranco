@@ -1,41 +1,27 @@
-# ---------------------
-# Salida compilada
-# ---------------------
+# Compiled output
 /dist
-/build
 /node_modules
+/build
 
-# ---------------------
-# Archivos de log
-# ---------------------
+# Logs
 logs
 *.log
-*.tgz
-*.gz
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# ---------------------
-# Archivos de sistema operativo
-# ---------------------
+# OS
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
 
-# ---------------------
-# Cobertura de pruebas
-# ---------------------
+# Test coverage
 /coverage
 /.nyc_output
 
-# ---------------------
-# IDEs y editores
-# ---------------------
-.idea/
+# IDEs and editors
+/.idea
 .project
 .classpath
 .c9/
@@ -43,56 +29,49 @@ Icon?
 .settings/
 *.sublime-workspace
 
-# ---------------------
-# VSCode (permitir ciertos archivos útiles)
-# ---------------------
+# VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# ---------------------
-# Archivos de entorno
-# ---------------------
+# Environment files
 .env
 .env.*
 !.env.example
 
-# ---------------------
-# Datos de ejecución
-# ---------------------
+# Runtime data
 pids
 *.pid
-*.pid.lock
 *.seed
+*.pid.lock
 
-# ---------------------
-# Informes de diagnóstico
-# ---------------------
-report.*.json
+# Diagnostic reports
+report.[0-9].[0-9].[0-9].[0-9].json
 
-# ---------------------
-# Archivos temporales
-# ---------------------
+# Temporary files
 .temp
 .tmp
 *.swp
 *.bak
 
-# ---------------------
-# NestJS (CLI)
-# ---------------------
+# Optional Nest CLI output (if using nest-cli.json)
 .nest-cli.json
 
-# ---------------------
-# Bases de datos locales
-# ---------------------
+# Optional SQLite or other local DBs
 *.sqlite
 *.sqlite3
 *.db
 
-# ---------------------
-# Archivos de procesos PM2
-# ---------------------
+# Optional PM2 process files
 *.pm2
+
+# Logs or error dumps
+*.log
+*.tgz
+*.gz
+
+# Windows system files
+ehthumbs.db
+Icon?
