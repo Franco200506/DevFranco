@@ -12,8 +12,8 @@ BEGIN
     BEGIN TRY
         IF @Id = 0
         BEGIN
-            INSERT INTO Beca.Estudiante (Nombre, Apellido, Edad, Correo, Fecha_Registro, Estado)
-            VALUES (RTRIM(LTRIM(@Nombre)), RTRIM(LTRIM(@Apellido)), @Edad, RTRIM(LTRIM(@Correo)), GETDATE(), 1);
+            INSERT INTO Beca.Estudiante (Nombre, Apellido, Edad, Correo, Fecha_Registro,Estado)
+            VALUES (RTRIM(LTRIM(@Nombre)), RTRIM(LTRIM(@Apellido)), @Edad, RTRIM(LTRIM(@Correo)), GETDATE(),1);
 
             SELECT SCOPE_IDENTITY() AS NewId;
         END
@@ -28,7 +28,7 @@ BEGIN
                 Fecha_Modificacion = GETDATE()
             WHERE Id = @Id;
 
-            SELECT @Id AS  NewId;
+            SELECT @Id AS NewId;
         END
     END TRY
     BEGIN CATCH
