@@ -6,49 +6,87 @@ import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 export class EstudianteService {
   constructor(private readonly sqlService: SqlService) {}
 
+  // 🔁 Función reutilizable para obtener un nombre desde un SP por ID
+  private async getNombreById(spName: string, id: number): Promise<string | null> {
+    const pool = await this.sqlService.getConnection();
+    const result = await pool.request().input('Id', id).execute(spName);
+    return result.recordset?.[0]?.Nombre ?? null;
+  }
+
   async create(obj: CreateEstudianteDto) {
     try {
       const pool = await this.sqlService.getConnection();
       const request = pool.request();
 
       const id = obj.Id ?? 0;
+      const EstadoId = Number(obj.EstadoId);
+      const CarreraId = Number(obj.carreraId);
 
       request.input('Id', id);
       request.input('Nombre', obj.nombre);
       request.input('Apellido', obj.apellido);
       request.input('Edad', obj.edad);
       request.input('Correo', obj.correo);
-
-      // Nuevos parámetros obligatorios del SP
-      request.input('EstadoId', 1); // Puedes cambiarlo por obj.estadoId si lo agregás al DTO
-      request.input('CarreraId', 1); // Igual acá
-      request.input('Estado', 1); // O el usuario actual si lo tenés
+      request.input('EstadoId', EstadoId);
+      request.input('CarreraId', CarreraId);
 
       const result: any = await request.execute('Beca.sp_Save_Estudiante');
 
-      console.log('Resultado del SP:', result);
+      const estudianteId =
+        result.recordset?.[0]?.NewId ||
+        result.recordset?.[0]?.UpdatedId ||
+        id;
 
-      if (result.recordset && result.recordset.length > 0) {
-        const resp = result.recordset[0].NewId || result.recordset[0].UpdatedId || result.recordset[0].Id;
-        return { id: resp };
-      } else {
-        return { id };
-      }
-    } catch (e) {
-      console.error('Error al ejecutar el SP:', JSON.stringify(e, null, 2));
-      return { error: 'Error interno', detalle: e.message ?? e };
+      const estadoNombre = await this.getNombreById('Beca.sp_Get_Estado', EstadoId);
+      const carreraNombre = await this.getNombreById('Beca.sp_Get_Carrera', CarreraId);
+
+      return {
+        id: estudianteId,
+        Nombre: obj.nombre,
+        Apellido: obj.apellido,
+        Edad: obj.edad,
+        Correo: obj.correo,
+        EstadoId,
+        estadoNombre,
+        CarreraId,
+        carreraNombre,
+      };
+    } catch (e: any) {
+      console.error('❌ Error:', e);
+      return {
+        error: 'Error interno',
+        detalle: e?.message || e?.originalError?.info?.message || JSON.stringify(e),
+      };
     }
   }
 
   async findAll() {
     try {
       const pool = await this.sqlService.getConnection();
-      const request = pool.request();
 
-      request.input('Id', 0);
-      const result: any = await request.execute('Beca.sp_Get_Estudiante');
+      const estudiantesResult = await pool.request().input('Id', 0).execute('Beca.sp_Get_Estudiante');
+      const estudiantes = estudiantesResult.recordset;
 
-      return result.recordset;
+      const [carrerasResult, estadosResult] = await Promise.all([
+        pool.request().input('Id', 0).execute('Beca.sp_Get_Carrera'),
+        pool.request().input('Id', 0).execute('Beca.sp_Get_Estado'),
+      ]);
+
+      const carreras = carrerasResult.recordset;
+      const estados = estadosResult.recordset;
+
+      const estudiantesConNombres = estudiantes.map(est => {
+        const carrera = carreras.find(c => c.Id === est.CarreraId);
+        const estado = estados.find(e => e.Id === est.EstadoId);
+
+        return {
+          ...est,
+          carreraNombre: carrera?.Nombre ?? null,
+          estadoNombre: estado?.Nombre ?? null,
+        };
+      });
+
+      return estudiantesConNombres;
     } catch (e) {
       console.error('Error al obtener estudiantes', JSON.stringify(e, null, 2));
       return { error: 'Error al obtener los estudiantes', detalle: e.message ?? e };
@@ -58,16 +96,24 @@ export class EstudianteService {
   async findOne(id: number) {
     try {
       const pool = await this.sqlService.getConnection();
-      const request = pool.request();
 
-      request.input('Id', id);
-      const result: any = await request.execute('Beca.sp_Get_Estudiante');
-
-      if (result.recordset.length === 0) {
+      const estudianteResult = await pool.request().input('Id', id).execute('Beca.sp_Get_Estudiante');
+      if (estudianteResult.recordset.length === 0) {
         return { mensaje: `Estudiante con ID ${id} no encontrado` };
       }
 
-      return result.recordset[0];
+      const estudiante = estudianteResult.recordset[0];
+
+      const [estadoNombre, carreraNombre] = await Promise.all([
+        this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
+        this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+      ]);
+
+      return {
+        ...estudiante,
+        estadoNombre,
+        carreraNombre,
+      };
     } catch (e) {
       console.error('Error al buscar estudiante por ID:', JSON.stringify(e, null, 2));
       return { error: 'Error al buscar el estudiante', detalle: e.message ?? e };
@@ -77,12 +123,29 @@ export class EstudianteService {
   async remove(id: number) {
     try {
       const pool = await this.sqlService.getConnection();
-      const request = pool.request();
 
-      request.input('Id', id);
-      await request.execute('Beca.sp_Delete_Estudiante');
+      const estudianteResult = await pool.request().input('Id', id).execute('Beca.sp_Get_Estudiante');
+      if (estudianteResult.recordset.length === 0) {
+        return { mensaje: `Estudiante con ID ${id} no encontrado` };
+      }
 
-      return { mensaje: `Estudiante con ID ${id} eliminado correctamente` };
+      const estudiante = estudianteResult.recordset[0];
+
+      const [estadoNombre, carreraNombre] = await Promise.all([
+        this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
+        this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+      ]);
+
+      await pool.request().input('Id', id).execute('Beca.sp_Delete_Estudiante');
+
+      return {
+        mensaje: `Estudiante con ID ${id} eliminado correctamente`,
+        estudiante: {
+          ...estudiante,
+          estadoNombre,
+          carreraNombre,
+        },
+      };
     } catch (e) {
       console.error('Error al eliminar estudiante:', JSON.stringify(e, null, 2));
       return { error: 'Error al eliminar el estudiante', detalle: e.message ?? e };

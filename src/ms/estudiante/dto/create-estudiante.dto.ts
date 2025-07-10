@@ -7,5 +7,5 @@ export class CreateEstudianteDto {
 
   EstadoId?: number;   // Nuevo campo opcional
   carreraId?: number;  // Nuevo campo opcional
-  Estado: number;
+  
 }
