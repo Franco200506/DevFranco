@@ -20,13 +20,13 @@ export class EstudianteService {
 
       const id = obj.Id ?? 0;
       const EstadoId = Number(obj.EstadoId);
-      const CarreraId = Number(obj.carreraId);
+      const CarreraId = Number(obj.CarreraId);
 
       request.input('Id', id);
-      request.input('Nombre', obj.nombre);
-      request.input('Apellido', obj.apellido);
-      request.input('Edad', obj.edad);
-      request.input('Correo', obj.correo);
+      request.input('Nombre', obj.Nombre);
+      request.input('Apellido', obj.Apellido);
+      request.input('Edad', obj.Edad);
+      request.input('Correo', obj.Correo);
       request.input('EstadoId', EstadoId);
       request.input('CarreraId', CarreraId);
 
@@ -42,10 +42,10 @@ export class EstudianteService {
 
       return {
         id: estudianteId,
-        Nombre: obj.nombre,
-        Apellido: obj.apellido,
-        Edad: obj.edad,
-        Correo: obj.correo,
+        Nombre: obj.Nombre,
+        Apellido: obj.Apellido,
+        Edad: obj.Edad,
+        Correo: obj.Correo,
         EstadoId,
         estadoNombre,
         CarreraId,
