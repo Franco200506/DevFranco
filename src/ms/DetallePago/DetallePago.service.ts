@@ -70,7 +70,11 @@ export class DetallePagoService {
         .request()
         .input('Id', 0)
         .execute('Beca.sp_Get_DetallePago');
-      const detallePagos = detallePagoResult.recordset;
+      
+      // 🛑 CAMBIO CLAVE: Se filtra el array para eliminar registros con IDs nulos o cero
+      const detallePagos = detallePagoResult.recordset.filter(
+        (detalle: any) => detalle.Id && detalle.Id > 0
+      );
 
       const estadosResult: any = await pool
         .request()
@@ -84,9 +88,9 @@ export class DetallePagoService {
         .execute('Beca.sp_Get_TipoPago');
       const tipoPagos = tipoPagoResult.recordset;
 
-      const detallePagosConNombres = detallePagos.map(req => {
-        const estado = estados.find(e => e.Id === Number(req.EstadoId));
-        const tipoPago = tipoPagos.find(tp => tp.Id === Number(req.TipoPagoId));
+      const detallePagosConNombres = detallePagos.map((req: any) => {
+        const estado = estados.find((e: any) => e.Id === Number(req.EstadoId));
+        const tipoPago = tipoPagos.find((tp: any) => tp.Id === Number(req.TipoPagoId));
 
         return {
           ...req,

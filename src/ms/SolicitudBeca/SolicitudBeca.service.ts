@@ -31,6 +31,8 @@ export class SolicitudBecaService {
       request.input('PeriodoAcademicoId', PeriodoAcademicoId);
       request.input('Observaciones', obj.Observaciones);
       request.input('Fecha_resultado', obj.Fecha_resultado);
+ 
+
 
       const result: any = await request.execute('Beca.sp_Save_SolicitudBeca');
 
@@ -78,6 +80,7 @@ export class SolicitudBecaService {
         PeriodoAcademiconombre: periodoacademicoNombre,
         Observaciones: obj.Observaciones,
         Fecha_resultado: obj.Fecha_resultado,
+     
       };
     } catch (e) {
       console.error('Error al ejecutar el SP:', JSON.stringify(e, null, 2));

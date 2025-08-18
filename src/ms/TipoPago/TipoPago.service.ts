@@ -47,7 +47,7 @@ export class TipoPagoService {
   }
 }
 
-  async findAll() {
+ async findAll() {
     try {
       const pool = await this.sqlService.getConnection();
 
@@ -55,7 +55,17 @@ export class TipoPagoService {
         .request()
         .input('Id', 0)
         .execute('Beca.sp_Get_TipoPago');
-      const TipoPagos = TipoPagoResult.recordset;
+
+      // 🛑 CORRECCIÓN: Filtramos los registros que no tienen un nombre válido
+      // Esto elimina los registros vacíos o de prueba que podría devolver el SP
+      const TipoPagos = TipoPagoResult.recordset.filter(
+        (tipo: any) => tipo.Nombre && tipo.Nombre.trim() !== ''
+      );
+
+      // Si no hay registros, devolvemos un array vacío.
+      if (TipoPagos.length === 0) {
+        return [];
+      }
 
       const estadosResult: any = await pool
         .request()
@@ -63,10 +73,9 @@ export class TipoPagoService {
         .execute('Beca.sp_Get_Estado');
       const estados = estadosResult.recordset;
 
-      const TipoPagosConNombres = TipoPagos.map(req => {
+      const TipoPagosConNombres = TipoPagos.map((req: any) => {
         const estadoId = Number(req.EstadoId);
-
-        const estado = estados.find(e => e.Id === estadoId);
+        const estado = estados.find((e: any) => e.Id === estadoId);
 
         return {
           ...req,
@@ -75,11 +84,12 @@ export class TipoPagoService {
       });
 
       return TipoPagosConNombres;
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error al obtener los TipoPagos', JSON.stringify(e, null, 2));
       return { error: 'Error al obtener los TipoPagos', detalle: e.message ?? e };
     }
   }
+     
 
   async findOne(id: number) {
     try {

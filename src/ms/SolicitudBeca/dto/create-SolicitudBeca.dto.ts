@@ -8,4 +8,5 @@ export class CreateSolicitudBecaDto {
   PeriodoAcademicoId: number;
   Observaciones: string;
   Fecha_resultado: string;
+  Nombre: string;
 }

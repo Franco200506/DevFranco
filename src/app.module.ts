@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { EstudianteModule } from './ms/estudiante/estudiante.module';
 import {AreaConocimientoModule} from './ms/AreaConocimiento/AreaConocimiento.module';
@@ -14,9 +15,10 @@ import {Detalle_requisitos_becaModule} from './ms/Detalle_requisitos-beca/Detall
 import {UsuarioModule} from './ms/Usuario/usuario.module'
 import {TipoPagoModule} from './ms/TipoPago/TipoPago.module'
 import {DetallePagoModule} from './ms/DetallePago/DetallePago.module'
+import {reporteModule} from './ms/Reporte/reporte.module'
 
 @Module({
-  imports: [EstudianteModule,AreaConocimientoModule,carreraModule,RequisitoModule,TipoBecaModule,PeriodoAcademicoModule,SolicitudBecaModule,EstadoModule,Detalle_requisitos_becaModule,UsuarioModule,TipoPagoModule,DetallePagoModule],
+  imports: [EstudianteModule,AreaConocimientoModule,carreraModule,RequisitoModule,TipoBecaModule,PeriodoAcademicoModule,SolicitudBecaModule,EstadoModule,Detalle_requisitos_becaModule,UsuarioModule,TipoPagoModule,DetallePagoModule,AuthModule,reporteModule],
   controllers: [AppController],
   providers: [AppService],
 })

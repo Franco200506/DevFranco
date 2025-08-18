@@ -8,30 +8,43 @@ export class SqlService {
   private readonly config: sql.config = {
     user: 'sa',
     password: '2005',
-    server: 'JEANFRANCO\\JEANFRANCO', // Tu instancia nombrada
+    server: 'JEANFRANCO\\JEANFRANCO',
     database: 'DbBecas',
     options: {
-      encrypt: true,               // <--- CAMBIAR A TRUE
-      trustServerCertificate: true, // Mantener en true para certificados no confiables/autofirmados
-      // Puedes añadir el puerto si tu instancia nombrada usa uno no estándar o si el SQL Browser no resuelve bien
-      // port: 1433, // El puerto predeterminado para SQL Server
+      encrypt: true,
+      trustServerCertificate: true,
     },
   };
 
   async getConnection(): Promise<sql.ConnectionPool> {
-    if (!this.pool || !this.pool.connected) { // Añadir !this.pool.connected para reconexión si se pierde
+    if (!this.pool || !this.pool.connected) {
       try {
         this.pool = await sql.connect(this.config);
         console.log('Conectado a la base de datos SQL Server.');
       } catch (error) {
         console.error('Error al conectar a la base de datos:', error);
-        throw error; // Relanzar el error para que NestJS lo maneje
+        throw error;
       }
     }
     return this.pool;
   }
 
-  // Opcional: Método para cerrar la conexión cuando la aplicación se apaga
+  // Método nuevo para ejecutar SP o consultas
+  async query(queryString: string, params?: { [key: string]: any }) {
+    const pool = await this.getConnection();
+    const request = pool.request();
+
+    // Agregar parámetros si los hay
+    if (params) {
+      for (const key in params) {
+        request.input(key, params[key]);
+      }
+    }
+
+    const result = await request.query(queryString);
+    return result.recordset; // Devuelve solo los registros
+  }
+
   async closeConnection() {
     if (this.pool && this.pool.connected) {
       try {
