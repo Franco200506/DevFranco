@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsuarioService } from '../ms/Usuario/usuario.service';
 import { CreateUsuarioDto } from '../ms/Usuario/dto/create-usuario.dto';
-import * as bcrypt from 'bcryptjs'; // 👈 usar bcryptjs en lugar de bcrypt nativo
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -100,12 +100,12 @@ export class AuthService {
       // Encriptar contraseña
       const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-      // Crear DTO
+      // Crear DTO - Corrección aquí: el campo 'nombre' debe ser 'Nombre'
       const createUsuarioDto: CreateUsuarioDto = {
         Id: 0,
-        Nombre: userData.username,
-        Contrasena: hashedPassword,
-       Email: userData.email,
+        Nombre: userData.username, // Aquí usamos username como nombre
+        Contrasena: hashedPassword, // La contraseña ahora está encriptada
+        Email: userData.email,
         Apellidos: userData.apellidos || '',
         Role: userData.role || 'user',
       };

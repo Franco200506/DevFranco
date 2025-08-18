@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SqlService } from '../../ms/cnxjs/sql.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuarioService {
@@ -12,10 +13,15 @@ export class UsuarioService {
       const request = pool.request();
 
       const id = obj.Id ?? 0;
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(obj.Contrasena, saltRounds);
 
       request.input('Id', id);
       request.input('Nombre', obj.Nombre);
-      request.input('Contrasena', obj.Contrasena);
+      request.input('Contrasena', hashedPassword); // The hashed password is used here
+      request.input('Apellidos', obj.Apellidos || '');
+      request.input('Email', obj.Email || '');
+      request.input('Role', obj.Role || 'user');
 
       const result: any = await request.execute('Beca.sp_Save_Usuario');
 

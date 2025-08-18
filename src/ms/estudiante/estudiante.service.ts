@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { SqlService } from '../../ms/cnxjs/sql.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 
@@ -21,6 +21,9 @@ export class EstudianteService {
       const id = obj.Id ?? 0;
       const EstadoId = Number(obj.EstadoId);
       const CarreraId = Number(obj.CarreraId);
+      // Asumiendo que UsuarioId es parte del DTO de creación
+      const UsuarioId = Number(obj.UsuarioId); 
+
 
       request.input('Id', id);
       request.input('Nombre', obj.Nombre);
@@ -29,6 +32,7 @@ export class EstudianteService {
       request.input('Correo', obj.Correo);
       request.input('EstadoId', EstadoId);
       request.input('CarreraId', CarreraId);
+      request.input('UsuarioId', UsuarioId);
 
       const result: any = await request.execute('Beca.sp_Save_Estudiante');
 
@@ -37,8 +41,11 @@ export class EstudianteService {
         result.recordset?.[0]?.UpdatedId ||
         id;
 
-      const estadoNombre = await this.getNombreById('Beca.sp_Get_Estado', EstadoId);
-      const carreraNombre = await this.getNombreById('Beca.sp_Get_Carrera', CarreraId);
+      const [estadoNombre, carreraNombre, usuarioNombre] = await Promise.all([
+          this.getNombreById('Beca.sp_Get_Estado', EstadoId),
+          this.getNombreById('Beca.sp_Get_Carrera', CarreraId),
+          this.getNombreById('Beca.sp_Get_Usuario', UsuarioId),
+      ]);
 
       return {
         id: estudianteId,
@@ -50,6 +57,8 @@ export class EstudianteService {
         estadoNombre,
         CarreraId,
         carreraNombre,
+        UsuarioId,
+        usuarioNombre,
       };
     } catch (e: any) {
       console.error('❌ Error:', e);
@@ -67,22 +76,26 @@ export class EstudianteService {
       const estudiantesResult = await pool.request().input('Id', 0).execute('Beca.sp_Get_Estudiante');
       const estudiantes = estudiantesResult.recordset;
 
-      const [carrerasResult, estadosResult] = await Promise.all([
+      const [carrerasResult, estadosResult, usuariosResult] = await Promise.all([
         pool.request().input('Id', 0).execute('Beca.sp_Get_Carrera'),
         pool.request().input('Id', 0).execute('Beca.sp_Get_Estado'),
+        pool.request().input('Id', 0).execute('Beca.sp_Get_Usuario'),
       ]);
 
       const carreras = carrerasResult.recordset;
       const estados = estadosResult.recordset;
+      const usuarios = usuariosResult.recordset;
 
       const estudiantesConNombres = estudiantes.map(est => {
         const carrera = carreras.find(c => c.Id === est.CarreraId);
         const estado = estados.find(e => e.Id === est.EstadoId);
+        const usuario = usuarios.find(u => u.Id === est.UsuarioId);
 
         return {
           ...est,
           carreraNombre: carrera?.Nombre ?? null,
           estadoNombre: estado?.Nombre ?? null,
+          usuarioNombre: usuario?.Nombre ?? null,
         };
       });
 
@@ -104,15 +117,17 @@ export class EstudianteService {
 
       const estudiante = estudianteResult.recordset[0];
 
-      const [estadoNombre, carreraNombre] = await Promise.all([
-        this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
-        this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+      const [estadoNombre, carreraNombre, usuarioNombre] = await Promise.all([
+          this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
+          this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+          this.getNombreById('Beca.sp_Get_Usuario', estudiante.UsuarioId),
       ]);
 
       return {
         ...estudiante,
         estadoNombre,
         carreraNombre,
+        usuarioNombre,
       };
     } catch (e) {
       console.error('Error al buscar estudiante por ID:', JSON.stringify(e, null, 2));
@@ -131,9 +146,10 @@ export class EstudianteService {
 
       const estudiante = estudianteResult.recordset[0];
 
-      const [estadoNombre, carreraNombre] = await Promise.all([
-        this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
-        this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+      const [estadoNombre, carreraNombre, usuarioNombre] = await Promise.all([
+          this.getNombreById('Beca.sp_Get_Estado', estudiante.EstadoId),
+          this.getNombreById('Beca.sp_Get_Carrera', estudiante.CarreraId),
+          this.getNombreById('Beca.sp_Get_Usuario', estudiante.UsuarioId),
       ]);
 
       await pool.request().input('Id', id).execute('Beca.sp_Delete_Estudiante');
@@ -144,6 +160,7 @@ export class EstudianteService {
           ...estudiante,
           estadoNombre,
           carreraNombre,
+          usuarioNombre,
         },
       };
     } catch (e) {
